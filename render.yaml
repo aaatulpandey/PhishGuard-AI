@@ -4,12 +4,12 @@ services:
     name: phishguard-db
     env: docker
     plan: free
-    ipAllowList: []
 
   # ── Redis Cache ──
   - type: redis
     name: phishguard-redis
     plan: free
+    ipAllowList: []
     maxmemoryPolicy: noeviction
 
   # ── FastAPI Backend ──

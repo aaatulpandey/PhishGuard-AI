@@ -12,13 +12,38 @@ export default function AuthPage() {
   const [isLogin, setIsLogin]       = useState(true);
   const [loading, setLoading]       = useState(false);
   const [showPass, setShowPass]     = useState(false);
-  const [form, setForm]             = useState({ email: "", password: "", full_name: "" });
+  const [errors, setErrors]         = useState<{ email?: string, password?: string }>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    // Clear error when user types
+    setErrors({ ...errors, [e.target.name]: undefined });
+  };
+
+  const validateForm = () => {
+    const newErrors: { email?: string, password?: string } = {};
+    if (!form.email.includes("@")) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+    
+    if (!isLogin) {
+      // Enforce the same strong password regex as the backend for registration
+      const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passRegex.test(form.password)) {
+        newErrors.password = "Password must be 8+ characters, with 1 uppercase, 1 number, and 1 special character.";
+      }
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password cannot be empty.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
     setLoading(true);
     try {
       if (isLogin) {
@@ -36,6 +61,7 @@ export default function AuthPage() {
         showToast("Account created! Please sign in.", "success");
         setIsLogin(true);
         setForm({ email: form.email, password: "", full_name: "" });
+        setErrors({});
       }
     } catch (err: any) {
       showToast(err.response?.data?.detail || "Authentication failed. Try again.", "error");
@@ -136,19 +162,21 @@ export default function AuthPage() {
               <Mail className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input type="email" name="email" placeholder="Email address"
                 value={form.email} onChange={handleChange} required
-                className="cyber-input pl-10" />
+                className={`cyber-input pl-10 ${errors.email ? 'border-red-500/50 focus:border-red-500/50 shadow-glow-red' : ''}`} />
+              {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
             </div>
 
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input type={showPass ? "text" : "password"} name="password"
                 placeholder="Password" value={form.password}
-                onChange={handleChange} required minLength={6}
-                className="cyber-input pl-10 pr-11" />
+                onChange={handleChange} required
+                className={`cyber-input pl-10 pr-11 ${errors.password ? 'border-red-500/50 focus:border-red-500/50 shadow-glow-red' : ''}`} />
               <button type="button" onClick={() => setShowPass(s => !s)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors">
+                className="absolute right-3.5 top-[22px] -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors">
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
+              {errors.password && <p className="text-xs text-red-400 mt-1 max-w-[300px] leading-tight">{errors.password}</p>}
             </div>
 
             {isLogin && (

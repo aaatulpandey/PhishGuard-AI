@@ -287,87 +287,104 @@ export default function Dashboard() {
       </div>
 
       {/* Selected scan detailed analysis overlay panel */}
-      {selectedScan && (
-        <div className="glass-panel p-6 rounded-2xl border border-cyber-accent/30 relative overflow-hidden scan-effect animate-fade-in">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-lg font-bold text-slate-200">Inspected URL Diagnostic</h3>
-            <button 
-              onClick={() => setSelectedScan(null)} 
-              className="text-xs text-slate-500 hover:text-white px-2 py-1 rounded bg-white/5"
-            >
-              Dismiss
-            </button>
-          </div>
-
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-1/4 flex flex-col items-center justify-center p-4 bg-slate-950/40 rounded-xl border border-white/5">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">VERDICT SCORE</span>
-              <div className="relative w-28 h-28 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="56" cy="56" r="48" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="transparent" />
-                  <circle 
-                    cx="56" 
-                    cy="56" 
-                    r="48" 
-                    stroke={selectedScan.risk_score >= 70 ? "#ef4444" : selectedScan.risk_score >= 40 ? "#f59e0b" : "#10b981"} 
-                    strokeWidth="6" 
-                    fill="transparent" 
-                    strokeDasharray={301}
-                    strokeDashoffset={301 - (301 * selectedScan.risk_score) / 100}
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-3xl font-extrabold text-white font-sans">{selectedScan.risk_score}</span>
-                  <span className="text-[9px] text-slate-500 uppercase tracking-widest">Score</span>
+      <div className={`transition-all duration-500 ease-in-out overflow-hidden ${selectedScan || loading ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        {loading ? (
+          <div className="glass-panel p-6 rounded-2xl border border-white/5 relative mb-6 animate-pulse flex flex-col gap-6">
+            <div className="h-6 w-48 bg-white/10 rounded"></div>
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="lg:w-1/4 h-40 bg-white/5 rounded-xl"></div>
+              <div className="lg:w-3/4 flex flex-col gap-3">
+                <div className="h-8 w-full bg-white/5 rounded"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-14 bg-white/5 rounded-lg"></div>
+                  <div className="h-14 bg-white/5 rounded-lg"></div>
                 </div>
-              </div>
-              <span className={`mt-3 px-3 py-1 text-xs font-bold rounded-full ${
-                selectedScan.classification === "Phishing" ? "bg-red-500/10 text-red-400 border border-red-500/20" :
-                selectedScan.classification === "Suspicious" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
-                "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              }`}>
-                {selectedScan.classification}
-              </span>
-            </div>
-
-            <div className="lg:w-3/4 flex flex-col gap-3">
-              <span className="text-xs text-slate-500 break-all font-mono bg-slate-950/40 p-2 rounded border border-white/5">{selectedScan.url}</span>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-[10px] text-slate-500 block">MODEL ALGORITHM</span>
-                  <span className="text-xs font-semibold text-slate-300">{selectedScan.model_name}</span>
-                </div>
-                <div className="bg-white/5 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-[10px] text-slate-500 block">MODEL PROBABILITY</span>
-                  <span className="text-xs font-semibold text-slate-300">{selectedScan.confidence}%</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-slate-400">Triggered Cyber Indicators:</span>
-                <ul className="text-xs text-slate-300 flex flex-col gap-1">
-                  {selectedScan.indicators.map((ind: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 bg-slate-950/40 p-2 rounded border border-white/5">
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1.5 ${
-                        selectedScan.risk_score >= 70 ? "bg-red-500" : selectedScan.risk_score >= 40 ? "bg-amber-500" : "bg-emerald-500"
-                      }`} />
-                      <span>{ind}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-                <span className="text-xs font-bold text-slate-300 block">Explanation Details:</span>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">{selectedScan.explanation}</p>
-                <span className="text-xs font-bold text-slate-300 block mt-2">Recommended Mitigation:</span>
-                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{selectedScan.recommendation}</p>
+                <div className="h-24 w-full bg-white/5 rounded-lg mt-2"></div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : selectedScan ? (
+          <div className="glass-panel p-6 rounded-2xl border border-cyber-accent/30 relative overflow-hidden scan-effect mb-6">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-bold text-slate-200">Inspected URL Diagnostic</h3>
+              <button 
+                onClick={() => setSelectedScan(null)} 
+                className="text-xs text-slate-500 hover:text-white px-2 py-1 rounded bg-white/5 transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="lg:w-1/4 flex flex-col items-center justify-center p-4 bg-slate-950/40 rounded-xl border border-white/5">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">VERDICT SCORE</span>
+                <div className="relative w-28 h-28 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="56" cy="56" r="48" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="transparent" />
+                    <circle 
+                      cx="56" 
+                      cy="56" 
+                      r="48" 
+                      stroke={selectedScan.risk_score >= 70 ? "#ef4444" : selectedScan.risk_score >= 40 ? "#f59e0b" : "#10b981"} 
+                      strokeWidth="6" 
+                      fill="transparent" 
+                      strokeDasharray={301}
+                      strokeDashoffset={301 - (301 * selectedScan.risk_score) / 100}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center">
+                    <span className="text-3xl font-extrabold text-white font-sans">{selectedScan.risk_score}</span>
+                    <span className="text-[9px] text-slate-500 uppercase tracking-widest">Score</span>
+                  </div>
+                </div>
+                <span className={`mt-3 px-3 py-1 text-xs font-bold rounded-full ${
+                  selectedScan.classification === "Phishing" ? "bg-red-500/10 text-red-400 border border-red-500/20" :
+                  selectedScan.classification === "Suspicious" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
+                  "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                }`}>
+                  {selectedScan.classification}
+                </span>
+              </div>
+
+              <div className="lg:w-3/4 flex flex-col gap-3">
+                <span className="text-xs text-slate-500 break-all font-mono bg-slate-950/40 p-2 rounded border border-white/5">{selectedScan.url}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/5 p-2.5 rounded-lg border border-white/5">
+                    <span className="text-[10px] text-slate-500 block">MODEL ALGORITHM</span>
+                    <span className="text-xs font-semibold text-slate-300">{selectedScan.model_name}</span>
+                  </div>
+                  <div className="bg-white/5 p-2.5 rounded-lg border border-white/5">
+                    <span className="text-[10px] text-slate-500 block">MODEL PROBABILITY</span>
+                    <span className="text-xs font-semibold text-slate-300">{selectedScan.confidence}%</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-slate-400">Triggered Cyber Indicators:</span>
+                  <ul className="text-xs text-slate-300 flex flex-col gap-1">
+                    {selectedScan.indicators.map((ind: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2 bg-slate-950/40 p-2 rounded border border-white/5">
+                        <span className={`w-1.5 h-1.5 rounded-full mt-1.5 ${
+                          selectedScan.risk_score >= 70 ? "bg-red-500" : selectedScan.risk_score >= 40 ? "bg-amber-500" : "bg-emerald-500"
+                        }`} />
+                        <span>{ind}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="p-3 bg-white/5 rounded-lg border border-white/5">
+                  <span className="text-xs font-bold text-slate-300 block">Explanation Details:</span>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{selectedScan.explanation}</p>
+                  <span className="text-xs font-bold text-slate-300 block mt-2">Recommended Mitigation:</span>
+                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{selectedScan.recommendation}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

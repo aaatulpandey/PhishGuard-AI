@@ -1,9 +1,8 @@
-services:
-  # ── PostgreSQL Database ──
-  - type: pserv
-    name: phishguard-db
-    env: docker
+databases:
+  - name: phishguard-db
     plan: free
+
+services:
 
   # ── Redis Cache ──
   - type: redis

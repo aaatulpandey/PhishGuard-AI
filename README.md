@@ -11,6 +11,10 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+<br/>
+<img src="docs/hero.png" alt="PhishGuard AI Hero" width="800" />
+<br/><br/>
+
 *Enterprise-grade cybersecurity platform for real-time phishing URL classification using multi-model machine learning, heuristic threat analysis, and explainable AI.*
 
 </div>
@@ -18,6 +22,9 @@
 ---
 
 ## ✨ Features
+
+<img src="docs/scanner.png" alt="Live Scanner and Analytics" width="800" />
+<br/><br/>
 
 | Feature | Description |
 |---|---|

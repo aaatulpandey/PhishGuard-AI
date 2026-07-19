@@ -1,0 +1,92 @@
+services:
+  # ── PostgreSQL Database ──
+  - type: pserv
+    name: phishguard-db
+    env: docker
+    plan: free
+
+  # ── Redis Cache ──
+  - type: redis
+    name: phishguard-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # ── FastAPI Backend ──
+  - type: web
+    name: phishguard-backend
+    env: docker
+    plan: free
+    rootDir: backend
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phishguard-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: '["*"]'
+
+  # ── Celery Background Worker ──
+  - type: worker
+    name: phishguard-worker
+    env: docker
+    plan: free
+    rootDir: backend
+    dockerCommand: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phishguard-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: phishguard-redis
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: phishguard-backend
+          envVarKey: SECRET_KEY
+
+  # ── React Frontend (Static Site) ──
+  - type: web
+    name: phishguard-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: phishguard-backend
+          property: url

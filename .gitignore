@@ -1,0 +1,53 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Git ignore file for PhishGuard AI
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Trained ML models (large binary files – regenerate via ml/model_trainer.py)
+ml/*.joblib
+ml/*.pkl
+
+# Database files
+*.db
+*.sqlite3
+tests/test_phishguard.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

@@ -11,7 +11,7 @@ import AdminPanel from "./pages/AdminPanel.tsx";
 import AuthPage   from "./pages/Auth.tsx";
 import axios from "axios";
 
-// Configure global Axios baseURL for production Render deployment
+// Configure global Axios baseURL for production deployment (e.g. Railway)
 // @ts-ignore
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || "";
 

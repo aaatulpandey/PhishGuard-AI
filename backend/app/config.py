@@ -19,6 +19,13 @@ class Settings(BaseSettings):
 
     # Database Configuration – falls back to SQLite locally
     DATABASE_URL: str = "sqlite:///./phishguard.db"
+    
+    @property
+    def sync_database_url(self) -> str:
+        """SQLAlchemy 1.4+ dropped support for postgres://, must be postgresql://"""
+        if self.DATABASE_URL.startswith("postgres://"):
+            return self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        return self.DATABASE_URL
 
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"

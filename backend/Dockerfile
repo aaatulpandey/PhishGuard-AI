@@ -16,8 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source
 COPY . .
 
-# Ensure ML models directory is accessible
-RUN mkdir -p /app/ml
 
 # Expose API port
 EXPOSE 8000

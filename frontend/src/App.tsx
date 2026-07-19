@@ -12,6 +12,7 @@ import AuthPage   from "./pages/Auth.tsx";
 import axios from "axios";
 
 // Configure global Axios baseURL for production Render deployment
+// @ts-ignore
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || "";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */

@@ -15,8 +15,8 @@ from app.models import ScanResult, User, AuditLog
 from app.schemas import ScanRequest, ScanResponse, BatchScanRequest, BatchScanResponse, DashboardStatsResponse
 from app.dependencies import get_current_user, get_current_active_user
 
-# Resolve project root (3 levels above this router file) and add to path
-_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+# Resolve project root (2 levels above this router file) and add to path
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 

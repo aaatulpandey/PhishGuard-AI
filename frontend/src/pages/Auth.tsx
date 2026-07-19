@@ -12,6 +12,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin]       = useState(true);
   const [loading, setLoading]       = useState(false);
   const [showPass, setShowPass]     = useState(false);
+  const [form, setForm]             = useState({ email: "", password: "", full_name: "" });
   const [errors, setErrors]         = useState<{ email?: string, password?: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,6 +4,7 @@ services:
     name: phishguard-db
     env: docker
     plan: free
+    ipAllowList: []
 
   # ── Redis Cache ──
   - type: redis
@@ -86,7 +87,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: phishguard-backend
-          property: url
+        value: https://phishguard-backend.onrender.com

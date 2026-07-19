@@ -22,5 +22,5 @@ RUN mkdir -p /app/ml
 # Expose API port
 EXPOSE 8000
 
-# Default: run Uvicorn ASGI server
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Default: run Uvicorn ASGI server with dynamic port support (for Railway/Heroku)
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2

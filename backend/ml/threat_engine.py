@@ -195,12 +195,12 @@ def analyze_url(url: str) -> dict:
         # Make prediction
         if metadata.get("best_model_name") == "Logistic Regression" and scaler is not None:
             scaled_vector = scaler.transform([feature_vector])
-            prob = model.predict_proba(scaled_vector)[0][1]
+            prob = float(model.predict_proba(scaled_vector)[0][1])
         else:
-            prob = model.predict_proba([feature_vector])[0][1]
+            prob = float(model.predict_proba([feature_vector])[0][1])
             
-        risk_score = round(prob * 100)
-        confidence = round((prob if prob >= 0.5 else (1 - prob)) * 100, 1)
+        risk_score = int(round(prob * 100))
+        confidence = float(round((prob if prob >= 0.5 else (1 - prob)) * 100, 1))
         
         if risk_score >= 70:
             classification = "Phishing"

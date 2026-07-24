@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, Field
+import re
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic import ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -9,7 +10,14 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, pattern=r"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", description="Password must be at least 8 characters, with 1 uppercase, 1 number, and 1 special character.")
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters, with 1 uppercase, 1 number, and 1 special character.")
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", v):
+            raise ValueError("Password must be at least 8 characters, with 1 uppercase, 1 number, and 1 special character.")
+        return v
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None

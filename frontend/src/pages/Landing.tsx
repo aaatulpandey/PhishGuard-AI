@@ -81,7 +81,9 @@ export default function Landing() {
       setResult(res.data);
       if (!scanUrl) setUrl(target);
     } catch (e: any) {
-      setError(e.response?.data?.detail || "Scan failed. Please check the URL.");
+      const apiError = e.response?.data?.detail;
+      const networkError = e.message || "Unknown error occurred";
+      setError(apiError || `Scan failed: ${networkError}`);
     } finally {
       setLoad(false);
     }

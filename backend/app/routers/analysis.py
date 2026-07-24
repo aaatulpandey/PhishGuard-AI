@@ -28,84 +28,73 @@ router = APIRouter(prefix="/analysis", tags=["Threat Analysis Engine"])
 # In-memory Redis mock for caching if Redis is not running
 CACHE = {}
 
-@router.post("/scan", response_model=ScanResponse)
+@router.post("/scan")
 def scan_url(
     payload: ScanRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user)
 ):
-    """
-    Scans a single URL.
-    Extracts features, runs ML models, and saves/returns the scan result.
-    Caches results to speed up repeated scans.
-    """
-    url = payload.url.strip()
-    if not url:
-        raise HTTPException(status_code=400, detail="URL cannot be empty.")
-        
-    # Check cache
-    if url in CACHE:
-        logger_info = f"Cache hit for URL: {url}"
-        print(logger_info)
-        # Create new database record for history even on cache hit, so logs are intact
-        cached_res = CACHE[url]
+    import traceback
+    try:
+        url = payload.url.strip()
+        if not url:
+            raise HTTPException(status_code=400, detail="URL cannot be empty.")
+            
+        if url in CACHE:
+            cached_res = CACHE[url]
+            db_res = ScanResult(
+                url=url,
+                risk_score=cached_res["risk_score"],
+                classification=cached_res["classification"],
+                confidence=cached_res["confidence"],
+                explanation=cached_res["explanation"],
+                recommendation=cached_res["recommendation"],
+                indicators=cached_res["indicators"],
+                features=cached_res["features"],
+                model_name=cached_res["model_name"] + " (Cached)",
+                user_id=current_user.id if current_user else None
+            )
+            db.add(db_res)
+            db.commit()
+            db.refresh(db_res)
+            return db_res
+            
+        try:
+            analysis = analyze_url(url)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Threat engine analysis failed: {str(e)}")
+            
         db_res = ScanResult(
             url=url,
-            risk_score=cached_res["risk_score"],
-            classification=cached_res["classification"],
-            confidence=cached_res["confidence"],
-            explanation=cached_res["explanation"],
-            recommendation=cached_res["recommendation"],
-            indicators=cached_res["indicators"],
-            features=cached_res["features"],
-            model_name=cached_res["model_name"] + " (Cached)",
+            risk_score=analysis["risk_score"],
+            classification=analysis["classification"],
+            confidence=analysis["confidence"],
+            explanation=analysis["explanation"],
+            recommendation=analysis["recommendation"],
+            indicators=analysis["indicators"],
+            features=analysis["features"],
+            model_name=analysis["model_name"],
             user_id=current_user.id if current_user else None
         )
         db.add(db_res)
         db.commit()
         db.refresh(db_res)
+        
+        if current_user:
+            audit = AuditLog(
+                user_id=current_user.id,
+                action="SCAN_URL",
+                details=f"Scanned: {url} | Class: {analysis['classification']} | Risk: {analysis['risk_score']}"
+            )
+            db.add(audit)
+            db.commit()
+            
+        CACHE[url] = analysis
         return db_res
-        
-    try:
-        # Run threat intelligence analyzer
-        analysis = analyze_url(url)
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Threat engine analysis failed: {str(e)}"
-        )
-        
-    # Save to Database
-    db_res = ScanResult(
-        url=url,
-        risk_score=analysis["risk_score"],
-        classification=analysis["classification"],
-        confidence=analysis["confidence"],
-        explanation=analysis["explanation"],
-        recommendation=analysis["recommendation"],
-        indicators=analysis["indicators"],
-        features=analysis["features"],
-        model_name=analysis["model_name"],
-        user_id=current_user.id if current_user else None
-    )
-    db.add(db_res)
-    db.commit()
-    db.refresh(db_res)
-    
-    # Audit logging for scans
-    if current_user:
-        audit = AuditLog(
-            user_id=current_user.id,
-            action="SCAN_URL",
-            details=f"Scanned: {url} | Class: {analysis['classification']} | Risk: {analysis['risk_score']}"
-        )
-        db.add(audit)
-        db.commit()
-        
-    # Store in Cache
-    CACHE[url] = analysis
-    
-    return db_res
+        db.rollback()
+        return Response(content=json.dumps({"detail": f"INTERNAL CRASH: {str(e)}", "trace": traceback.format_exc()}), status_code=500, media_type="application/json")
+
 
 @router.post("/batch", response_model=BatchScanResponse)
 def batch_scan_urls(

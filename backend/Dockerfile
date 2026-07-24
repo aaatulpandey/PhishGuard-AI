@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 8000
 
 # Default: run Uvicorn ASGI server with dynamic port support (for Railway/Heroku)
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
